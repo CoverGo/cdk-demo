@@ -2,27 +2,39 @@
 
 ## Introduction
 - cdk8s is developed by AWS
-- cdk8s are like library, which synthesizes k8s manifests
+- cdk8s are like library, which synthesizes your code into k8s manifests
+
+<img src="./cdk8s.drawio.png" alt="cdk8s.drawio" style="zoom:70%;float:left;" />
+
 - cdk8s cli is workflow tool
 - cdk8s supports typescript, python, golang
 
 ## Typescript
-This demo will be using typescript.
+**This demo will use Typescript.**
 
-- npm package: https://www.npmjs.com/package/cdk8s
+### Overview
 
-- `cdk8s.yaml` is configuration for cdk8s cli
-  
-    ```yaml
-    language: typescript
-    app: node main.js
-    imports:
-      - k8s
-    ```
-    
-    `language` can be Typescript/Python/GoLang
-    
-    `app` represents the command that `cdk8s synth` command will execute (in this case: `cdk8s synth` means execute `node main.js`)
+1. Run `npm install -g cdk8s-cli`  to **install its cli globally**.
+
+2. Run `cdk8s init typescript-app` to **create a new typescript cdk8s project**.
+
+   - You can see that in `package.json` and `node_modules/`, it already has cdk8s dependencies defined and installed.  `package.json` :
+
+   <img src="./image-20220119185956854.png" alt="image-20220119185956854" style="zoom:50%;float:left;" />
+
+   - You can also see a `cdk8s.yaml` generated. And `app` represents what `cdk8s synth` command will run (i.e. in this case, `cdk8s synth` = `node main.js`). `cdk8s.yaml` :
+
+   <img src="/Users/viennewan/Documents/Projects/cdk-demo/cdk8s_yaml.png" alt="cdk8s_yaml" style="zoom:50%;float:left;" />
+
+3. **Start your code** in `main.ts`, then **compile it** to `main.js` with `npm run compile `. (This part will have more detail in next section.)
+4. Run `cdk8s synth` to **synthesize your code into manifests.**
+   - K8S manifests will be generated in `dist/` folder
+
+
+
+### Code
+
+- You can make use of  `npm run watch` command. It helps while you are coding, it will automatically compile your `.ts` to `.js` on every Save. 
 
 - Frequently used  `class` is  `Chart`
 
@@ -57,6 +69,8 @@ This demo will be using typescript.
   }
   // ...
   ```
+
+- Easy to refactor code for deplicated actions such as deployments, services, so on.
 
 - Use `Jest` to implement unit tests comparing synthesized result and Chart. This helps detect any expected and unexpected changes. (It is good to include this step in CI pipeline too)
 
