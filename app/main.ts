@@ -6,7 +6,18 @@ export class MyChart extends Chart {
   constructor(scope: Construct, id: string, props: ChartProps = { }) {
     super(scope, id, props);
 
-    const label = { app: 'hello-k8s' };
+
+    const label = { 'k8s-app': 'covergo-auth','team':'backend' };
+    const namespace = "development";
+    const env = [{"name": "datacenterId","value": "12factor"},{"name": "terminationTimeout",
+    "value": "30"},{"name": "ASPNETCORE_ENVIRONMENT",
+    "value": "Production"},{"name": "TRACING_ENABLED",
+    "value": "true"},{"name": "TRACING_CONNECTION_STRING",
+    "value": "http://opentelemetry-collector.open-telemetry:4317"},{"name": "TRACING_EXPORT_TIMEOUT",
+    "value": "1000"}]
+    const envFrom = [{"secretRef":
+      {"name": "covergo-database"}},{"secretRef":
+      {"name": "covergo-password"}}]
 
     // notice that there is no assigment necessary when creating resources.
     // simply instantiating the resource is enough because it adds it to the construct tree via
@@ -17,29 +28,44 @@ export class MyChart extends Chart {
     // atrtibutes of the resource in other parts of the code.
 
     new KubeService(this, 'service', {
+      metadata: {
+        namespace: namespace,
+        annotations:{ "reloader.stakater.com/auto": "true"}
+      },
       spec: {
         type: 'LoadBalancer',
-        ports: [ { port: 80, targetPort: IntOrString.fromNumber(8080) } ],
-        selector: label
+        ports: [ { port: 80, targetPort: IntOrString.fromNumber(8080), protocol: 'TCP', name: 'tcp-8080-8080-kg68l' } ],
+        selector: label,
       }
     });
 
     new KubeDeployment(this, 'deployment', {
+      metadata: {
+        namespace: namespace,
+      },
       spec: {
         replicas: 2,
         selector: {
           matchLabels: label
         },
         template: {
-          metadata: { labels: label },
+          metadata: { labels: label , annotations: {
+            "linkerd.io/inject":"enabled"}},
           spec: {
+            terminationGracePeriodSeconds: 60,
             containers: [
               {
-                name: 'hello-kubernetes',
-                image: 'paulbouwer/hello-kubernetes:1.7',
-                ports: [ { containerPort: 8080 } ]
+                name: 'covergo-auth',
+                image: 'registry-intl.cn-hongkong.aliyuncs.com/covergo/auth:latest',
+                ports: [ { containerPort: 8080 } ],
+                env: env,
+                envFrom: envFrom,
+                imagePullPolicy: 'Always',
+
               }
-            ]
+            ],
+            imagePullSecrets: [{"name":"registry-intl.cn-hongkong.aliyuncs.com"}],
+            restartPolicy: 'Always'
           }
         }
       }
