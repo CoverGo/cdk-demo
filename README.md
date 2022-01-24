@@ -80,7 +80,7 @@
 
 Imagine a Git repository with a single YAML file that contains a basic Kubernetes manifest (e.g. Deployment + Service). Flux will take care of applying this to your cluster. If you push more changes into this repository Flux will take care of keeping your cluster in the desired state.
 
-![cicd_ckd8s](../cdk-demo/cicd_ckd8s.png)
+<img src="./cicd_ckd8s.png" alt="cicd_ckd8s" style="zoom:90%;float:left;" />
 
 - Git branch merge will trigger ci pipeline which eventually synthesize any changes in cdk8s/
 - We could design each cluster to pulls from only which branch and which directory path
